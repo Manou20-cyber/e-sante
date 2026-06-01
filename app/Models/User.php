@@ -52,4 +52,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class);
     }
+
+    public function dashboardUrl(): string
+    {
+        return match (true) {
+            $this->hasAnyRole(['super_admin', 'cabinet_admin', 'opticien']) => route('admin.dashboard'),
+            $this->hasRole('patient') => route('patient.dashboard'),
+            default => route('dashboard'),
+        };
+    }
 }

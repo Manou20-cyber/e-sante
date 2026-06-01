@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RetourCommande extends Model
 {
+    protected $table = 'retours_commande';
+
     protected $fillable = [
         'commande_id',
         'patient_id',

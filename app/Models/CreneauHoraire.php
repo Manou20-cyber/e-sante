@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CreneauHoraire extends Model
 {
+    protected $table = 'creneaux_horaires';
+
     protected $fillable = [
         'cabinet_id',
         'jour_semaine',
