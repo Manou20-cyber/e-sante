@@ -13,6 +13,8 @@ class UpdateCabinetRequest extends FormRequest
 
     public function rules(): array
     {
+        $isSuperAdmin = $this->user()?->hasRole('super_admin');
+
         return [
             'nom' => ['required', 'string', 'max:255'],
             'adresse' => ['required', 'string', 'max:500'],
@@ -22,8 +24,10 @@ class UpdateCabinetRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'siret' => ['nullable', 'string', 'max:20'],
             'description' => ['nullable', 'string'],
-            'user_id' => ['required', 'exists:users,id'],
-            'est_actif' => ['boolean'],
+            'logo' => ['nullable', 'image', 'max:1024'],
+            'supprimer_logo' => ['nullable', 'boolean'],
+            'user_id' => $isSuperAdmin ? ['required', 'exists:users,id'] : ['nullable'],
+            'est_actif' => $isSuperAdmin ? ['boolean'] : ['nullable'],
         ];
     }
 }

@@ -5,10 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class CabinetOptique extends Model
 {
     protected $table = 'cabinets_optiques';
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $cabinet) {
+            $cabinet->uuid = (string) Str::uuid();
+        });
+    }
 
     protected $fillable = [
         'user_id',
@@ -34,6 +42,12 @@ class CabinetOptique extends Model
     public function admin(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function opticiens(): HasMany
+    {
+        return $this->hasMany(User::class, 'cabinet_id')
+            ->whereHas('roles', fn ($q) => $q->where('name', 'opticien'));
     }
 
     public function creneaux(): HasMany

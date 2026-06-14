@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(echo \"symlink status: $?\")",
+      "Bash(vendor/bin/pint --dirty --format agent app/Http/Controllers/Admin/ParametreController.php app/Services/ParametreService.php app/Services/PaletteService.php app/Providers/AppServiceProvider.php database/seeders/ParametreSeeder.php database/seeders/DatabaseSeeder.php routes/web.php)",
+      "Bash(php -l app/Http/Controllers/Admin/ParametreController.php app/Services/PaletteService.php app/Services/ParametreService.php database/seeders/ParametreSeeder.php)",
+      "Bash(vendor/bin/pint --dirty --format agent app/Http/Controllers/Admin/CabinetController.php app/Http/Controllers/Admin/ParametreController.php app/Http/Requests/Admin/UpdateCabinetRequest.php routes/web.php)"
+    ]
+  }
+}

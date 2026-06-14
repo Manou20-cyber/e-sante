@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── Valeurs par défaut du thème (écrasées par partials/theme.blade.php) ─── */
+:root {
+    --th-sidebar-bg:         #1e3a5f;
+    --th-sidebar-border:     #1e40af;
+    --th-sidebar-text:       #bfdbfe;
+    --th-sidebar-muted:      #93c5fd;
+    --th-sidebar-active:     #1d4ed8;
+    --th-sidebar-hover:      #1e3a8a;
+    --th-logo-bg:            #3b82f6;
+    --th-primary:            #2563eb;
+    --th-primary-light-bg:   #eff6ff;
+    --th-primary-light-text: #1d4ed8;
+}
+
+/* ─── Classes thème sidebar (admin) ─── */
+.th-sidebar          { background-color: var(--th-sidebar-bg); }
+.th-sidebar-border   { border-color: var(--th-sidebar-border); }
+.th-sidebar-text     { color: var(--th-sidebar-text); }
+.th-sidebar-muted    { color: var(--th-sidebar-muted); }
+.th-sidebar-active   { background-color: var(--th-sidebar-active); }
+.th-sidebar-hover:hover { background-color: var(--th-sidebar-hover); }
+
+/* ─── Classes thème partagées ─── */
+.th-logo-bg          { background-color: var(--th-logo-bg); }
+.th-primary-bg       { background-color: var(--th-primary); }
+.th-primary-text     { color: var(--th-primary); }
+
+/* Active nav patient (fond clair + texte coloré) */
+.th-nav-active       { background-color: var(--th-primary-light-bg); color: var(--th-primary-light-text); }
+.th-nav-hover:hover  { background-color: var(--th-primary-light-bg); color: var(--th-primary-light-text); }
+
+/* Avatar patient */
+.th-avatar-bg        { background-color: var(--th-primary-light-bg); color: var(--th-primary-light-text); }

@@ -13,6 +13,9 @@ class DashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $user = auth()->user();
+        $isSuperAdmin = $user->hasRole('super_admin');
+
         $stats = [
             'patients' => Patient::count(),
             'cabinets' => CabinetOptique::count(),
@@ -25,6 +28,10 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'rendezvous_recents'));
+        $cabinets_en_attente = $isSuperAdmin
+            ? CabinetOptique::where('est_actif', false)->latest()->get()
+            : collect();
+
+        return view('admin.dashboard', compact('stats', 'rendezvous_recents', 'cabinets_en_attente', 'isSuperAdmin'));
     }
 }

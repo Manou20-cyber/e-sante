@@ -1,5 +1,88 @@
 <x-admin-layout title="Tableau de bord">
 
+    {{-- Cabinets en attente de validation (super_admin seulement) --}}
+    @if($isSuperAdmin && $cabinets_en_attente->isNotEmpty())
+        <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl overflow-hidden">
+            <div class="px-5 py-3 border-b border-amber-200 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="font-semibold text-amber-800 text-sm">
+                        {{ $cabinets_en_attente->count() }} cabinet(s) en attente de validation
+                    </span>
+                </div>
+                <a href="{{ route('admin.cabinets.index') }}" class="text-xs text-amber-700 hover:underline font-medium">
+                    Voir tous les cabinets →
+                </a>
+            </div>
+            <div class="divide-y divide-amber-100">
+                @foreach($cabinets_en_attente->take(5) as $cab)
+                    <div class="px-5 py-3 flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">{{ $cab->nom }}</p>
+                            <p class="text-xs text-gray-500">{{ $cab->ville }} · {{ $cab->email }}</p>
+                        </div>
+                        <form method="POST" action="{{ route('admin.cabinets.valider', $cab) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                    class="shrink-0 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition">
+                                Valider
+                            </button>
+                        </form>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Notification en attente de validation (cabinet_admin seulement) --}}
+    @if(auth()->user()->hasRole('cabinet_admin'))
+        @php $cabinet = auth()->user()->cabinetOptique; @endphp
+
+        @if($cabinet && !$cabinet->est_actif)
+            <div x-data="{ show: true }" x-show="show"
+                 class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
+                <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-amber-800 text-sm">Compte en attente de validation</p>
+                    <p class="text-amber-700 text-xs mt-0.5">
+                        Votre cabinet <strong>{{ $cabinet->nom }}</strong> est en cours d'examen par notre équipe.
+                        Vous recevrez une notification dès que votre compte sera activé.
+                    </p>
+                </div>
+                <button @click="show = false" class="text-amber-400 hover:text-amber-600 transition shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+        @elseif($cabinet && $cabinet->est_actif && session('pending_validation') === null)
+            <div class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+                <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <span class="font-semibold text-green-800 text-sm">Cabinet validé</span>
+                    <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full border border-green-200">
+                        ✓ Actif
+                    </span>
+                    <p class="text-green-700 text-xs mt-0.5">Votre cabinet <strong>{{ $cabinet->nom }}</strong> est pleinement opérationnel.</p>
+                </div>
+            </div>
+        @endif
+    @endif
+
     {{-- Stats --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 

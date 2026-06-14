@@ -7,8 +7,10 @@ use App\Http\Requests\Admin\StoreCommandeRequest;
 use App\Http\Requests\Admin\UpdateCommandeRequest;
 use App\Models\CabinetOptique;
 use App\Models\Commande;
+use App\Models\Facture;
 use App\Models\Patient;
 use App\Models\Produit;
+use App\Notifications\CommandeStatutChange;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,7 +20,7 @@ class CommandeController extends Controller
 {
     public function index(): View
     {
-        $commandes = Commande::with(['patient.user', 'cabinet', 'produits'])
+        $commandes = Commande::with(['patient.user', 'cabinet', 'produits', 'facture'])
             ->latest()
             ->paginate(15);
 
@@ -31,6 +33,8 @@ class CommandeController extends Controller
 
     public function store(StoreCommandeRequest $request): RedirectResponse
     {
+        abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne crée pas de commandes.');
+
         DB::transaction(function () use ($request) {
             $commande = Commande::create([
                 'patient_id' => $request->patient_id,
@@ -53,6 +57,19 @@ class CommandeController extends Controller
             }
 
             $commande->update(['montant_total' => $total]);
+
+            Facture::create([
+                'patient_id' => $commande->patient_id,
+                'cabinet_id' => $commande->cabinet_id,
+                'commande_id' => $commande->id,
+                'numero' => 'FAC-'.strtoupper(Str::random(8)),
+                'montant_ht' => $total,
+                'taux_tva' => 0,
+                'montant_ttc' => $total,
+                'statut' => 'emise',
+                'date_emission' => now(),
+                'date_echeance' => now()->addDays(30),
+            ]);
         });
 
         return back()->with('success', 'Commande créée avec succès.');
@@ -60,13 +77,22 @@ class CommandeController extends Controller
 
     public function update(UpdateCommandeRequest $request, Commande $commande): RedirectResponse
     {
+        abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne modifie pas les commandes.');
+
+        $ancienStatut = $commande->statut;
         $commande->update($request->validated());
+
+        if ($commande->statut !== $ancienStatut && $commande->patient?->user) {
+            $commande->patient->user->notify(new CommandeStatutChange($commande));
+        }
 
         return back()->with('success', 'Commande mise à jour avec succès.');
     }
 
     public function destroy(Commande $commande): RedirectResponse
     {
+        abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne supprime pas les commandes.');
+
         $commande->delete();
 
         return back()->with('success', 'Commande supprimée avec succès.');

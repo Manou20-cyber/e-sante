@@ -15,8 +15,6 @@ class UpdateCommandeRequest extends FormRequest
     {
         return [
             'statut' => ['required', 'in:en_attente,confirmee,en_preparation,prete,livree,annulee'],
-            'adresse_livraison' => ['nullable', 'string', 'max:500'],
-            'notes' => ['nullable', 'string'],
         ];
     }
 }
