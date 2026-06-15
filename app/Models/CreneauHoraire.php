@@ -12,6 +12,8 @@ class CreneauHoraire extends Model
 
     protected $fillable = [
         'cabinet_id',
+        'opticien_id',
+        'prix',
         'jour_semaine',
         'heure_debut',
         'heure_fin',
@@ -24,7 +26,13 @@ class CreneauHoraire extends Model
     {
         return [
             'est_actif' => 'boolean',
+            'prix' => 'decimal:0',
         ];
+    }
+
+    public function opticien(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'opticien_id');
     }
 
     public function cabinet(): BelongsTo

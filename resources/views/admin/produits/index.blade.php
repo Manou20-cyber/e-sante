@@ -1,7 +1,9 @@
 <x-admin-layout title="Produits / Stock">
 
+@php $isSuperAdmin = auth()->user()->hasRole('super_admin'); @endphp
+
 <div x-data="{
-    editItem: null,
+    editItem: {},
     deleteId: null,
     setEdit(item) { this.editItem = {...item}; $dispatch('open-modal', 'edit-produit') },
     setDelete(id) { this.deleteId = id; $dispatch('open-modal', 'delete-produit') }
@@ -12,13 +14,17 @@
             <h2 class="text-lg font-semibold text-gray-900">Produits / Stock</h2>
             <p class="text-sm text-gray-500">{{ $produits->total() }} produit(s)</p>
         </div>
-        <button @click="$dispatch('open-modal', 'create-produit')"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Nouveau produit
-        </button>
+        @unless($isSuperAdmin)
+            <button @click="$dispatch('open-modal', 'create-produit')"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Nouveau produit
+            </button>
+        @else
+            <span class="text-xs px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg font-medium">Vue lecture seule</span>
+        @endunless
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -32,7 +38,9 @@
                         <th class="px-6 py-3 text-left font-medium">Prix</th>
                         <th class="px-6 py-3 text-left font-medium">Stock</th>
                         <th class="px-6 py-3 text-left font-medium">Statut</th>
-                        <th class="px-6 py-3 text-left font-medium">Actions</th>
+                        @unless($isSuperAdmin)
+                            <th class="px-6 py-3 text-left font-medium">Actions</th>
+                        @endunless
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -50,7 +58,7 @@
                                     {{ $produit->categorie }}
                                 </span>
                             </td>
-                            <td class="px-6 py-3 text-gray-900 font-medium">{{ number_format($produit->prix, 2) }} €</td>
+                            <td class="px-6 py-3 text-gray-900 font-medium">{{ number_format($produit->prix, 0, ",", " ") }} XAF</td>
                             <td class="px-6 py-3">
                                 <span class="{{ $produit->stock <= $produit->stock_alerte ? 'text-red-600 font-semibold' : 'text-gray-700' }}">
                                     {{ $produit->stock }}
@@ -64,28 +72,30 @@
                                     {{ $produit->est_actif ? 'Actif' : 'Inactif' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-3">
-                                <div class="flex items-center gap-2">
-                                    <button @click="setEdit({{ $produit }})"
-                                            class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    <button @click="setDelete({{ $produit->id }})"
-                                            class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
+                            @unless($isSuperAdmin)
+                                <td class="px-6 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <button @click="setEdit({{ $produit }})"
+                                                class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </button>
+                                        <button @click="setDelete({{ $produit->id }})"
+                                                class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            @endunless
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-10 text-center text-gray-400">Aucun produit</td>
+                            <td colspan="{{ $isSuperAdmin ? 6 : 7 }}" class="px-6 py-10 text-center text-gray-400">Aucun produit</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -95,6 +105,8 @@
             <div class="px-6 py-4 border-t border-gray-100">{{ $produits->links() }}</div>
         @endif
     </div>
+
+    @unless($isSuperAdmin)
 
     {{-- Modal Créer --}}
     <x-modal name="create-produit" max-width="lg">
@@ -128,7 +140,7 @@
                     </select>
                 </div>
                 <div>
-                    <x-input-label for="pr_prix" value="Prix (€) *"/>
+                    <x-input-label for="pr_prix" value="Prix (XAF) *"/>
                     <x-text-input id="pr_prix" name="prix" type="number" step="0.01" min="0" class="mt-1 block w-full" required/>
                 </div>
                 <div>
@@ -157,7 +169,7 @@
 
     {{-- Modal Modifier --}}
     <x-modal name="edit-produit" max-width="lg">
-        <form method="POST" :action="`{{ url('admin/produits') }}/${editItem?.id}`" class="p-6">
+        <form method="POST" :action="`{{ url('dashboard/produits') }}/${editItem?.id}`" class="p-6">
             @csrf
             @method('PUT')
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Modifier le produit</h2>
@@ -187,7 +199,7 @@
                     </select>
                 </div>
                 <div>
-                    <x-input-label value="Prix (€) *"/>
+                    <x-input-label value="Prix (XAF) *"/>
                     <x-text-input name="prix" type="number" step="0.01" min="0" class="mt-1 block w-full" x-model="editItem.prix" required/>
                 </div>
                 <div>
@@ -222,7 +234,7 @@
         <div class="p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-2">Supprimer le produit</h2>
             <p class="text-sm text-gray-500 mb-6">Cette action est irréversible.</p>
-            <form method="POST" :action="`{{ url('admin/produits') }}/${deleteId}`">
+            <form method="POST" :action="`{{ url('dashboard/produits') }}/${deleteId}`">
                 @csrf
                 @method('DELETE')
                 <div class="flex justify-end gap-3">
@@ -232,6 +244,8 @@
             </form>
         </div>
     </x-modal>
+
+    @endunless
 
 </div>
 </x-admin-layout>

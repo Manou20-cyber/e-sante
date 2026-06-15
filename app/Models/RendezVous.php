@@ -14,6 +14,7 @@ class RendezVous extends Model
         'patient_id',
         'cabinet_id',
         'creneau_id',
+        'opticien_id',
         'date',
         'duree',
         'type',
@@ -42,6 +43,11 @@ class RendezVous extends Model
     public function creneau(): BelongsTo
     {
         return $this->belongsTo(CreneauHoraire::class, 'creneau_id');
+    }
+
+    public function opticien(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'opticien_id');
     }
 
     public function consultation(): HasOne

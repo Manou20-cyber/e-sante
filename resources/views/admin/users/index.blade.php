@@ -1,7 +1,7 @@
 <x-admin-layout title="Utilisateurs">
 
 <div x-data="{
-    editItem: null,
+    editItem: {},
     deleteId: null,
     setEdit(item) { this.editItem = {...item, role: item.roles?.[0]?.name ?? ''}; $dispatch('open-modal', 'edit-user') },
     setDelete(id) { this.deleteId = id; $dispatch('open-modal', 'delete-user') }
@@ -124,7 +124,7 @@
 
     {{-- Modal Modifier --}}
     <x-modal name="edit-user" max-width="lg">
-        <form method="POST" :action="`{{ url('admin/users') }}/${editItem?.id}`" class="p-6">
+        <form method="POST" :action="`{{ url('dashboard/users') }}/${editItem?.id}`" class="p-6">
             @csrf
             @method('PUT')
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Modifier l'utilisateur</h2>
@@ -167,7 +167,7 @@
         <div class="p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-2">Supprimer l'utilisateur</h2>
             <p class="text-sm text-gray-500 mb-6">Cette action est irréversible. Êtes-vous sûr ?</p>
-            <form method="POST" :action="`{{ url('admin/users') }}/${deleteId}`">
+            <form method="POST" :action="`{{ url('dashboard/users') }}/${deleteId}`">
                 @csrf
                 @method('DELETE')
                 <div class="flex justify-end gap-3">

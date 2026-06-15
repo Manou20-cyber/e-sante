@@ -1,7 +1,7 @@
 <x-admin-layout title="Patients">
 
 <div x-data="{
-    editItem: null,
+    editItem: {},
     deleteId: null,
     setEdit(item) { this.editItem = {...item, ...item.user}; $dispatch('open-modal', 'edit-patient') },
     setDelete(id) { this.deleteId = id; $dispatch('open-modal', 'delete-patient') }
@@ -132,7 +132,7 @@
 
     {{-- Modal Modifier --}}
     <x-modal name="edit-patient" max-width="lg">
-        <form method="POST" :action="`{{ url('admin/patients') }}/${editItem?.id}`" class="p-6">
+        <form method="POST" :action="`{{ url('dashboard/patients') }}/${editItem?.id}`" class="p-6">
             @csrf
             @method('PUT')
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Modifier le patient</h2>
@@ -188,7 +188,7 @@
         <div class="p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-2">Supprimer le patient</h2>
             <p class="text-sm text-gray-500 mb-6">Le compte utilisateur associé sera également supprimé. Cette action est irréversible.</p>
-            <form method="POST" :action="`{{ url('admin/patients') }}/${deleteId}`">
+            <form method="POST" :action="`{{ url('dashboard/patients') }}/${deleteId}`">
                 @csrf
                 @method('DELETE')
                 <div class="flex justify-end gap-3">

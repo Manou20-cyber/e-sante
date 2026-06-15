@@ -1,7 +1,7 @@
 <x-admin-layout title="Cabinets optiques">
 
 <div x-data="{
-    editItem: null,
+    editItem: {},
     deleteId: null,
     setEdit(item) { this.editItem = {...item}; $dispatch('open-modal', 'edit-cabinet') },
     setDelete(id) { this.deleteId = id; $dispatch('open-modal', 'delete-cabinet') }
@@ -28,6 +28,7 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
                     <tr>
+                        <th class="px-6 py-3 text-left font-medium">Logo</th>
                         <th class="px-6 py-3 text-left font-medium">Nom</th>
                         <th class="px-6 py-3 text-left font-medium">Ville</th>
                         <th class="px-6 py-3 text-left font-medium">Téléphone</th>
@@ -39,17 +40,46 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($cabinets as $cabinet)
                         <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-3">
+                                @if($cabinet->logo)
+                                    <img src="{{ Storage::url($cabinet->logo) }}" alt="Logo"
+                                         class="w-10 h-10 rounded-lg object-contain border border-gray-200 bg-gray-50 p-0.5">
+                                @else
+                                    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </td>
                             <td class="px-6 py-3 font-medium text-gray-900">{{ $cabinet->nom }}</td>
                             <td class="px-6 py-3 text-gray-600">{{ $cabinet->ville }}</td>
                             <td class="px-6 py-3 text-gray-600">{{ $cabinet->telephone }}</td>
                             <td class="px-6 py-3 text-gray-600">{{ $cabinet->admin?->name }}</td>
                             <td class="px-6 py-3">
-                                <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $cabinet->est_actif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
-                                    {{ $cabinet->est_actif ? 'Actif' : 'Inactif' }}
-                                </span>
+                                @if($cabinet->est_actif)
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Actif</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">En attente</span>
+                                @endif
                             </td>
                             <td class="px-6 py-3">
                                 <div class="flex items-center gap-2">
+                                    @if(!$cabinet->est_actif && auth()->user()->hasRole('super_admin'))
+                                        <form method="POST"
+                                              action="{{ route('admin.cabinets.valider', $cabinet) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit"
+                                                    class="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition"
+                                                    title="Valider ce cabinet">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @endif
                                     <button @click="setEdit({{ $cabinet }})"
                                             class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +167,8 @@
 
     {{-- Modal Modifier --}}
     <x-modal name="edit-cabinet" max-width="lg">
-        <form method="POST" :action="`{{ url('admin/cabinets') }}/${editItem?.id}`" class="p-6">
+        <form method="POST" :action="`{{ url('dashboard/cabinets') }}/${editItem?.id}`"
+              enctype="multipart/form-data" class="p-6">
             @csrf
             @method('PUT')
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Modifier le cabinet</h2>
@@ -167,22 +198,42 @@
                     <x-input-label value="Email"/>
                     <x-text-input name="email" type="email" class="mt-1 block w-full" x-model="editItem.email"/>
                 </div>
+
+                {{-- Logo --}}
                 <div class="sm:col-span-2">
-                    <x-input-label value="Administrateur *"/>
-                    <select name="user_id" required x-model="editItem.user_id"
-                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                        @foreach($admins as $admin)
-                            <option value="{{ $admin->id }}">{{ $admin->name }}</option>
-                        @endforeach
-                    </select>
+                    <x-input-label value="Logo"/>
+                    <div x-show="editItem?.logo" class="flex items-center gap-3 mt-1 mb-2">
+                        <img :src="`{{ asset('storage') }}/${editItem?.logo}`" alt="Logo actuel"
+                             class="w-12 h-12 rounded-lg object-contain border border-gray-200 bg-gray-50 p-1">
+                        <label class="flex items-center gap-1 cursor-pointer">
+                            <input type="checkbox" name="supprimer_logo" value="1"
+                                   class="rounded border-gray-300 text-red-500">
+                            <span class="text-xs text-red-500">Supprimer le logo</span>
+                        </label>
+                    </div>
+                    <input type="file" name="logo" accept="image/*"
+                           class="mt-1 w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+                    <p class="text-xs text-gray-400 mt-1">PNG, JPG, SVG — max 1 Mo</p>
                 </div>
-                <div class="sm:col-span-2 flex items-center gap-2">
-                    <input type="hidden" name="est_actif" value="0">
-                    <input type="checkbox" id="est_actif" name="est_actif" value="1"
-                           x-bind:checked="editItem?.est_actif"
-                           class="rounded border-gray-300 text-blue-600 shadow-sm"/>
-                    <label for="est_actif" class="text-sm text-gray-700">Cabinet actif</label>
-                </div>
+
+                @if(auth()->user()->hasRole('super_admin'))
+                    <div class="sm:col-span-2">
+                        <x-input-label value="Administrateur *"/>
+                        <select name="user_id" required x-model="editItem.user_id"
+                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            @foreach($admins as $admin)
+                                <option value="{{ $admin->id }}">{{ $admin->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2 flex items-center gap-2">
+                        <input type="hidden" name="est_actif" value="0">
+                        <input type="checkbox" id="est_actif" name="est_actif" value="1"
+                               x-bind:checked="editItem?.est_actif"
+                               class="rounded border-gray-300 text-blue-600 shadow-sm"/>
+                        <label for="est_actif" class="text-sm text-gray-700">Cabinet actif</label>
+                    </div>
+                @endif
             </div>
 
             <div class="flex justify-end gap-3 mt-6">
@@ -199,7 +250,7 @@
         <div class="p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-2">Supprimer le cabinet</h2>
             <p class="text-sm text-gray-500 mb-6">Cette action est irréversible. Êtes-vous sûr de vouloir supprimer ce cabinet ?</p>
-            <form method="POST" :action="`{{ url('admin/cabinets') }}/${deleteId}`">
+            <form method="POST" :action="`{{ url('dashboard/cabinets') }}/${deleteId}`">
                 @csrf
                 @method('DELETE')
                 <div class="flex justify-end gap-3">

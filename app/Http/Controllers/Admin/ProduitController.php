@@ -14,7 +14,16 @@ class ProduitController extends Controller
 {
     public function index(): View
     {
-        $produits = Produit::with('cabinet')->latest()->paginate(15);
+        $user = auth()->user();
+
+        $query = Produit::with('cabinet')->latest();
+
+        if (! $user->hasRole('super_admin')) {
+            $cabinetId = $user->cabinet_id ?? $user->cabinetOptique?->id;
+            $query->where('cabinet_id', $cabinetId);
+        }
+
+        $produits = $query->paginate(15);
         $cabinets = CabinetOptique::where('est_actif', true)->get();
 
         return view('admin.produits.index', compact('produits', 'cabinets'));
@@ -22,6 +31,8 @@ class ProduitController extends Controller
 
     public function store(StoreProduitRequest $request): RedirectResponse
     {
+        abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne crée pas de produits.');
+
         Produit::create($request->validated());
 
         return back()->with('success', 'Produit créé avec succès.');
@@ -29,6 +40,8 @@ class ProduitController extends Controller
 
     public function update(UpdateProduitRequest $request, Produit $produit): RedirectResponse
     {
+        abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne modifie pas les produits.');
+
         $produit->update($request->validated());
 
         return back()->with('success', 'Produit mis à jour avec succès.');
@@ -36,6 +49,8 @@ class ProduitController extends Controller
 
     public function destroy(Produit $produit): RedirectResponse
     {
+        abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne supprime pas les produits.');
+
         $produit->delete();
 
         return back()->with('success', 'Produit supprimé avec succès.');
