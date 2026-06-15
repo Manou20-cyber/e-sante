@@ -20,12 +20,14 @@ class CreneauHoraire extends Model
         'duree_consultation',
         'capacite_max',
         'est_actif',
+        'accepte_video',
     ];
 
     protected function casts(): array
     {
         return [
             'est_actif' => 'boolean',
+            'accepte_video' => 'boolean',
             'prix' => 'decimal:0',
         ];
     }

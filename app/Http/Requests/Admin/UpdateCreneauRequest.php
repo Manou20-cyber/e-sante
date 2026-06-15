@@ -30,6 +30,7 @@ class UpdateCreneauRequest extends FormRequest
             'capacite_max' => ['nullable', 'integer', 'min:1', 'max:10'],
             'prix' => ['required', 'numeric', 'min:0'],
             'est_actif' => ['boolean'],
+            'accepte_video' => ['boolean'],
         ];
     }
 }

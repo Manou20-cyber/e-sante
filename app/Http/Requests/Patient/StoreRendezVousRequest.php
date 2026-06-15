@@ -23,6 +23,7 @@ class StoreRendezVousRequest extends FormRequest
             'heures.*' => ['required', 'date_format:H:i'],
             'type' => ['required', 'string', 'max:50'],
             'motif' => ['nullable', 'string', 'max:500'],
+            'demande_video' => ['boolean'],
         ];
     }
 }

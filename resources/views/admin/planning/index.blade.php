@@ -60,6 +60,15 @@
                         <p class="font-semibold text-gray-700">
                             Prix : {{ $creneau->prix ? number_format($creneau->prix, 0, ',', ' ').' XAF' : 'Non défini' }}
                         </p>
+                        @if($creneau->accepte_video)
+                            <p class="inline-flex items-center gap-1 text-purple-700 font-medium">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                Vidéo acceptée
+                            </p>
+                        @endif
                     </div>
                     <div class="flex gap-2">
                         <button @click="setEdit({{ $creneau }})"
@@ -129,6 +138,18 @@
                                   :value="old('prix')"/>
                     <x-input-error :messages="$errors->get('prix')" class="mt-1"/>
                 </div>
+                <div class="col-span-2">
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 cursor-pointer transition">
+                        <input type="hidden" name="accepte_video" value="0">
+                        <input type="checkbox" name="accepte_video" value="1"
+                               {{ old('accepte_video') ? 'checked' : '' }}
+                               class="mt-0.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"/>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Accepter les consultations vidéo</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Les patients pourront demander une téléconsultation pour ce créneau.</p>
+                        </div>
+                    </label>
+                </div>
             </div>
             <div class="flex justify-end gap-3 mt-6">
                 <x-secondary-button type="button" @click="$dispatch('close-modal', 'create-creneau')">Annuler</x-secondary-button>
@@ -180,6 +201,18 @@
                     <input type="checkbox" name="est_actif" value="1" x-bind:checked="editItem?.est_actif"
                            class="rounded border-gray-300 text-blue-600"/>
                     <span class="text-sm text-gray-700">Créneau actif</span>
+                </div>
+                <div class="col-span-2">
+                    <label class="flex items-start gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 cursor-pointer transition">
+                        <input type="hidden" name="accepte_video" value="0">
+                        <input type="checkbox" name="accepte_video" value="1"
+                               x-bind:checked="editItem?.accepte_video"
+                               class="mt-0.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"/>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Accepter les consultations vidéo</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Les patients pourront demander une téléconsultation pour ce créneau.</p>
+                        </div>
+                    </label>
                 </div>
             </div>
             <div class="flex justify-end gap-3 mt-6">

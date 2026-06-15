@@ -14,15 +14,7 @@ class UpdateRendezVousRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'patient_id' => ['required', 'exists:patients,id'],
-            'cabinet_id' => ['required', 'exists:cabinets_optiques,id'],
-            'creneau_id' => ['nullable', 'exists:creneaux_horaires,id'],
-            'date' => ['required', 'date'],
-            'duree' => ['required', 'integer', 'min:15', 'max:180'],
-            'type' => ['required', 'string', 'max:50'],
             'statut' => ['required', 'in:en_attente,confirme,annule,termine,absent'],
-            'motif' => ['nullable', 'string', 'max:500'],
-            'notes' => ['nullable', 'string'],
         ];
     }
 }

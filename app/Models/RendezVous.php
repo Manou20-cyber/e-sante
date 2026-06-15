@@ -21,13 +21,23 @@ class RendezVous extends Model
         'statut',
         'motif',
         'notes',
+        'demande_video',
+        'video_room',
+        'video_started_at',
     ];
 
     protected function casts(): array
     {
         return [
             'date' => 'datetime',
+            'demande_video' => 'boolean',
+            'video_started_at' => 'datetime',
         ];
+    }
+
+    public function hasVideoRoom(): bool
+    {
+        return $this->video_room !== null;
     }
 
     public function patient(): BelongsTo

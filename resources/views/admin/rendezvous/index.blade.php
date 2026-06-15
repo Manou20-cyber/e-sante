@@ -68,7 +68,33 @@
                             @unless($isSuperAdmin)
                                 <td class="px-6 py-3">
                                     <div class="flex items-center gap-2">
-                                        <button @click="setEdit({{ $rdv }})"
+                                        {{-- Consultation vidéo --}}
+                                        @if($rdv->demande_video)
+                                            @if($rdv->hasVideoRoom())
+                                                <a href="{{ route('admin.video.room', $rdv) }}"
+                                                   class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition" title="Rejoindre la consultation vidéo">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                              d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    Rejoindre
+                                                </a>
+                                            @elseif($rdv->statut === 'confirme')
+                                                <form method="POST" action="{{ route('admin.video.start', $rdv) }}">
+                                                    @csrf
+                                                    <button type="submit"
+                                                            class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition" title="Démarrer la consultation vidéo">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                  d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                                        </svg>
+                                                        Démarrer
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @endif
+
+                                        <button @click="setEdit({{ Js::from(array_merge($rdv->toArray(), ['date_display' => $rdv->date->translatedFormat('l d F Y à H:i')])) }})"
                                                 class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -152,62 +178,96 @@
         </x-modal>
 
         {{-- Modal Modifier --}}
-        <x-modal name="edit-rdv" max-width="lg">
+        <x-modal name="edit-rdv" max-width="md">
             <form method="POST" :action="`{{ url('dashboard/rendezvous') }}/${editItem?.id}`" class="p-6">
                 @csrf
                 @method('PUT')
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Modifier le rendez-vous</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label value="Patient *"/>
-                        <select name="patient_id" required x-model="editItem.patient_id"
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                            @foreach($patients as $p)
-                                <option value="{{ $p->id }}">{{ $p->user->name }}</option>
-                            @endforeach
-                        </select>
+
+                <h2 class="text-lg font-semibold text-gray-900 mb-1">Rendez-vous</h2>
+                <p class="text-xs text-gray-400 mb-5">Informations du rendez-vous — seul le statut est modifiable.</p>
+
+                {{-- Infos lecture seule --}}
+                <div class="bg-gray-50 rounded-xl border border-gray-100 divide-y divide-gray-100 mb-5 text-sm">
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <span class="w-5 text-gray-400 shrink-0">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </span>
+                        <span class="text-gray-500 w-20 shrink-0">Patient</span>
+                        <span class="font-medium text-gray-900" x-text="editItem.patient?.user?.name ?? '—'"></span>
                     </div>
-                    <div>
-                        <x-input-label value="Cabinet *"/>
-                        <select name="cabinet_id" required x-model="editItem.cabinet_id"
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                            @foreach($cabinets as $c)
-                                <option value="{{ $c->id }}">{{ $c->nom }}</option>
-                            @endforeach
-                        </select>
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <span class="w-5 text-gray-400 shrink-0">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </span>
+                        <span class="text-gray-500 w-20 shrink-0">Cabinet</span>
+                        <span class="font-medium text-gray-900" x-text="editItem.cabinet?.nom ?? '—'"></span>
                     </div>
-                    <div>
-                        <x-input-label value="Date et heure *"/>
-                        <x-text-input name="date" type="datetime-local" class="mt-1 block w-full" x-model="editItem.date" required/>
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <span class="w-5 text-gray-400 shrink-0">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </span>
+                        <span class="text-gray-500 w-20 shrink-0">Date</span>
+                        <span class="font-medium text-gray-900" x-text="editItem.date_display ?? '—'"></span>
                     </div>
-                    <div>
-                        <x-input-label value="Durée (min) *"/>
-                        <x-text-input name="duree" type="number" min="15" max="180" class="mt-1 block w-full" x-model="editItem.duree" required/>
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <span class="w-5 text-gray-400 shrink-0">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </span>
+                        <span class="text-gray-500 w-20 shrink-0">Durée</span>
+                        <span class="font-medium text-gray-900" x-text="(editItem.duree ?? '—') + ' min'"></span>
                     </div>
-                    <div>
-                        <x-input-label value="Type *"/>
-                        <x-text-input name="type" class="mt-1 block w-full" x-model="editItem.type" required/>
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <span class="w-5 text-gray-400 shrink-0">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </span>
+                        <span class="text-gray-500 w-20 shrink-0">Type</span>
+                        <span class="font-medium text-gray-900" x-text="editItem.type ?? '—'"></span>
                     </div>
-                    <div>
-                        <x-input-label value="Statut *"/>
-                        <select name="statut" required x-model="editItem.statut"
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                            <option value="en_attente">En attente</option>
-                            <option value="confirme">Confirmé</option>
-                            <option value="termine">Terminé</option>
-                            <option value="annule">Annulé</option>
-                            <option value="absent">Absent</option>
-                        </select>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <x-input-label value="Motif"/>
-                        <textarea name="motif" rows="2" x-model="editItem.motif"
-                                  class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"></textarea>
-                    </div>
+                    <template x-if="editItem.motif">
+                        <div class="flex items-start gap-3 px-4 py-3">
+                            <span class="w-5 text-gray-400 shrink-0 mt-0.5">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                </svg>
+                            </span>
+                            <span class="text-gray-500 w-20 shrink-0">Motif</span>
+                            <span class="text-gray-700 italic" x-text="editItem.motif"></span>
+                        </div>
+                    </template>
                 </div>
+
+                {{-- Statut modifiable --}}
+                <div>
+                    <x-input-label for="edit_statut" value="Statut *"/>
+                    <select id="edit_statut" name="statut" required x-model="editItem.statut"
+                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
+                        <option value="en_attente">En attente</option>
+                        <option value="confirme">Confirmé</option>
+                        <option value="termine">Terminé</option>
+                        <option value="annule">Annulé</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                </div>
+
                 <div class="flex justify-end gap-3 mt-6">
                     <x-secondary-button type="button" @click="$dispatch('close-modal', 'edit-rdv')">Annuler</x-secondary-button>
-                    <x-primary-button>Enregistrer</x-primary-button>
+                    <x-primary-button>Enregistrer le statut</x-primary-button>
                 </div>
             </form>
         </x-modal>

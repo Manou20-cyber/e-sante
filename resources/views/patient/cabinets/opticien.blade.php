@@ -3,11 +3,12 @@
 @php
     $joursMap = [1 => 'Lun', 2 => 'Mar', 3 => 'Mer', 4 => 'Jeu', 5 => 'Ven', 6 => 'Sam', 7 => 'Dim'];
     $creneauxData = $creneaux->mapWithKeys(fn ($group, $jour) => [$jour => $group->map(fn ($c) => [
-        'id' => $c->id,
-        'heure_debut' => $c->heure_debut,
-        'heure_fin' => $c->heure_fin,
-        'duree' => $c->duree_consultation,
-        'prix' => $c->prix,
+        'id'            => $c->id,
+        'heure_debut'   => $c->heure_debut,
+        'heure_fin'     => $c->heure_fin,
+        'duree'         => $c->duree_consultation,
+        'prix'          => $c->prix,
+        'accepte_video' => (bool) $c->accepte_video,
     ])]);
 @endphp
 
@@ -177,6 +178,19 @@
                                               class="block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm text-sm"
                                               placeholder="Décrivez votre motif de consultation..."></textarea>
                                 </div>
+
+                                {{-- Option vidéo, visible uniquement si le créneau l'accepte --}}
+                                <template x-if="selectedCreneauAccepteVideo">
+                                    <label class="flex items-start gap-3 p-3 rounded-xl border border-purple-200 bg-purple-50 cursor-pointer hover:bg-purple-100 transition">
+                                        <input type="hidden" name="demande_video" value="0">
+                                        <input type="checkbox" name="demande_video" value="1" x-model="demandeVideo"
+                                               class="mt-0.5 rounded border-purple-300 text-purple-600 focus:ring-purple-500"/>
+                                        <div>
+                                            <p class="text-sm font-semibold text-purple-800">Je souhaite une téléconsultation vidéo</p>
+                                            <p class="text-xs text-purple-600 mt-0.5">La consultation se fera en vidéoconférence. L'opticien vous enverra un lien lors de la confirmation.</p>
+                                        </div>
+                                    </label>
+                                </template>
                             </div>
 
                             <button type="submit"
@@ -212,9 +226,11 @@ function bookingCalendar(creneauxData) {
     return {
         creneauxData: creneauxData,
         selectedCreneauId: null,
+        selectedCreneauAccepteVideo: false,
         selectedJour: null,
         selectedDate: '',
         selectedHours: [],
+        demandeVideo: false,
         currentDate: new Date(),
 
         get monthYear() {
@@ -232,16 +248,19 @@ function bookingCalendar(creneauxData) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
+            const localDateStr = (y, m, d) =>
+                `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
             // Jours du mois précédent
             for (let i = startPadding - 1; i > 0; i--) {
                 const d = new Date(year, month, -i);
-                days.push({ day: d.getDate(), date: d.toISOString().split('T')[0], currentMonth: false, hasCreneau: false });
+                days.push({ day: d.getDate(), date: localDateStr(d.getFullYear(), d.getMonth(), d.getDate()), currentMonth: false, hasCreneau: false });
             }
 
             // Jours du mois en cours
             for (let d = 1; d <= lastDay.getDate(); d++) {
                 const date = new Date(year, month, d);
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = localDateStr(year, month, d);
                 const dayOfWeek = date.getDay() || 7;
                 const hasCreneau = this.creneauxData[dayOfWeek] && this.creneauxData[dayOfWeek].length > 0 && date >= today;
                 days.push({ day: d, date: dateStr, currentMonth: true, hasCreneau, jourSemaine: dayOfWeek });
@@ -251,23 +270,22 @@ function bookingCalendar(creneauxData) {
             const remaining = 42 - days.length;
             for (let d = 1; d <= remaining; d++) {
                 const date = new Date(year, month + 1, d);
-                days.push({ day: d, date: date.toISOString().split('T')[0], currentMonth: false, hasCreneau: false });
+                days.push({ day: d, date: localDateStr(date.getFullYear(), date.getMonth(), date.getDate()), currentMonth: false, hasCreneau: false });
             }
 
             return days;
         },
 
         get dayCreneaux() {
-            if (!this.selectedDate) return [];
-            const date = new Date(this.selectedDate);
-            const dayOfWeek = date.getDay() || 7;
-            return this.creneauxData[dayOfWeek] || [];
+            if (!this.selectedDate || this.selectedJour === null) return [];
+            return this.creneauxData[this.selectedJour] || [];
         },
 
         get formattedSelectedDate() {
             if (!this.selectedDate) return '';
-            const d = new Date(this.selectedDate);
-            return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            const [y, m, d] = this.selectedDate.split('-').map(Number);
+            const date = new Date(y, m - 1, d);
+            return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
         },
 
         get availableHours() {
@@ -318,14 +336,19 @@ function bookingCalendar(creneauxData) {
 
         selectDay(date, jourSemaine) {
             this.selectedDate = date;
+            this.selectedJour = jourSemaine;
             this.selectedCreneauId = null;
             this.selectedHours = [];
+            this.demandeVideo = false;
         },
 
         selectCreneau(id, jour) {
             this.selectedCreneauId = id;
             this.selectedJour = jour;
             this.selectedHours = [];
+            this.demandeVideo = false;
+            const creneau = Object.values(this.creneauxData).flat().find(c => c.id === id);
+            this.selectedCreneauAccepteVideo = creneau ? creneau.accepte_video : false;
         }
     };
 }

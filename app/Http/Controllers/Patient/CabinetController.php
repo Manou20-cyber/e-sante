@@ -66,6 +66,7 @@ class CabinetController extends Controller
             'type' => $request->type,
             'statut' => 'en_attente',
             'motif' => $request->motif,
+            'demande_video' => $creneau->accepte_video && $request->boolean('demande_video'),
         ];
 
         foreach ($request->heures as $heure) {

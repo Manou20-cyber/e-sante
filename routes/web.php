@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\RendezVousController;
 use App\Http\Controllers\Admin\RetourController;
 use App\Http\Controllers\Admin\StatistiquesController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VideoConsultationController;
 use App\Http\Controllers\Auth\RegisterCabinetController;
 use App\Http\Controllers\Patient\CabinetController as PatientCabinetController;
 use App\Http\Controllers\Patient\CommandeController as PatientCommandeController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Patient\MessageController as PatientMessageController;
 use App\Http\Controllers\Patient\NotificationController as PatientNotificationController;
 use App\Http\Controllers\Patient\PaiementController as PatientPaiementController;
 use App\Http\Controllers\Patient\RendezVousController as PatientRendezVousController;
+use App\Http\Controllers\Patient\VideoConsultationController as PatientVideoController;
 use App\Http\Controllers\ProfileController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -86,6 +88,7 @@ Route::prefix('patient')->name('patient.')->middleware(['auth', 'verified', 'rol
     Route::get('/messages/{cabinet:uuid}', [PatientMessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{cabinet:uuid}/repondre', [PatientMessageController::class, 'repondre'])->name('messages.repondre');
     Route::get('/historique', PatientHistoriqueController::class)->name('historique');
+    Route::get('/rendezvous/{rendezvou}/video', [PatientVideoController::class, 'room'])->name('rendezvous.video');
     Route::get('/factures', [PatientFactureController::class, 'index'])->name('factures.index');
     Route::get('/factures/{facture}', [PatientFactureController::class, 'show'])->name('factures.show');
     Route::post('/factures/{facture}/payer', [PatientPaiementController::class, 'store'])->name('factures.payer');
@@ -136,6 +139,10 @@ Route::prefix('dashboard')->name('admin.')->middleware(['auth', 'verified', 'rol
     // Retours
     Route::get('retours', [RetourController::class, 'index'])->name('retours.index');
     Route::put('retours/{retour}', [RetourController::class, 'update'])->name('retours.update');
+
+    // Consultation vidéo (admin/opticien)
+    Route::post('rendezvous/{rendezvou}/video/start', [VideoConsultationController::class, 'start'])->name('video.start');
+    Route::get('rendezvous/{rendezvou}/video', [VideoConsultationController::class, 'room'])->name('video.room');
 
     // Statistiques
     Route::get('statistiques', [StatistiquesController::class, 'index'])->name('statistiques.index');

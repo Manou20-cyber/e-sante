@@ -30,6 +30,7 @@ class StoreCreneauRequest extends FormRequest
             'duree_consultation' => ['required', 'integer', 'min:15', 'max:120'],
             'capacite_max' => ['nullable', 'integer', 'min:1', 'max:10'],
             'prix' => ['required', 'numeric', 'min:0'],
+            'accepte_video' => ['boolean'],
         ];
     }
 }
