@@ -249,6 +249,16 @@
             <h1 class="text-lg font-semibold text-gray-900">{{ $title ?? 'Administration' }}</h1>
 
             <div class="ml-auto flex items-center gap-3">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" title="Déconnexion"
+                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </button>
+                </form>
                 @if(session('success'))
                     <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
                          class="flex items-center gap-2 bg-green-50 text-green-700 text-sm px-3 py-1.5 rounded-lg border border-green-200">

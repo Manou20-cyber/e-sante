@@ -116,7 +116,7 @@
                         </span>
 
                         {{-- Badge / bouton vidéo --}}
-                        @if($rdv->demande_video)
+                        @if($rdv->demande_video && $rdv->statut === 'confirme')
                             @if($rdv->hasVideoRoom())
                                 <a href="{{ route('patient.rendezvous.video', $rdv) }}"
                                    class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 text-green-700 border border-green-200 rounded-lg hover:bg-green-200 transition" title="Rejoindre la consultation vidéo">

@@ -69,7 +69,7 @@
                                 <td class="px-6 py-3">
                                     <div class="flex items-center gap-2">
                                         {{-- Consultation vidéo --}}
-                                        @if($rdv->demande_video)
+                                        @if($rdv->demande_video && $rdv->statut === 'confirme')
                                             @if($rdv->hasVideoRoom())
                                                 <a href="{{ route('admin.video.room', $rdv) }}"
                                                    class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition" title="Rejoindre la consultation vidéo">
@@ -79,7 +79,7 @@
                                                     </svg>
                                                     Rejoindre
                                                 </a>
-                                            @elseif($rdv->statut === 'confirme')
+                                            @else
                                                 <form method="POST" action="{{ route('admin.video.start', $rdv) }}">
                                                     @csrf
                                                     <button type="submit"

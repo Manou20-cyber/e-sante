@@ -2,7 +2,11 @@
 
 @php $isSuperAdmin = auth()->user()->hasRole('super_admin'); @endphp
 
-<div x-data="{ tab: 'dossier' }">
+<div x-data="{
+    tab: 'dossier',
+    editOrd: null,
+    setEditOrd(ord) { this.editOrd = { ...ord }; $dispatch('open-modal', 'edit-ordonnance'); }
+}">
 
     {{-- En-tête patient --}}
     <div class="flex items-center gap-4 mb-6">
@@ -87,21 +91,49 @@
         @else
             <div class="space-y-3">
                 @foreach($patient->dossierMedical->ordonnances as $ordonnance)
+                    @php
+                        $ordData = [
+                            'id'               => $ordonnance->id,
+                            'date'             => $ordonnance->date->format('Y-m-d'),
+                            'sphere_od'        => $ordonnance->sphere_od,
+                            'sphere_og'        => $ordonnance->sphere_og,
+                            'cylindre_od'      => $ordonnance->cylindre_od,
+                            'cylindre_og'      => $ordonnance->cylindre_og,
+                            'axe_od'           => $ordonnance->axe_od,
+                            'axe_og'           => $ordonnance->axe_og,
+                            'addition_od'      => $ordonnance->addition_od,
+                            'addition_og'      => $ordonnance->addition_og,
+                            'ecart_pupillaire' => $ordonnance->ecart_pupillaire,
+                            'notes'            => $ordonnance->notes,
+                        ];
+                    @endphp
                     <div x-data="{ open: false }" class="bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <button @click="open = !open"
-                                class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition text-left rounded-xl">
-                            <div>
-                                <p class="font-medium text-gray-900 text-sm">Ordonnance du {{ $ordonnance->date->format('d/m/Y') }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">
-                                    OD {{ $ordonnance->sphere_od > 0 ? '+' : '' }}{{ $ordonnance->sphere_od ?? '—' }}
-                                    / OG {{ $ordonnance->sphere_og > 0 ? '+' : '' }}{{ $ordonnance->sphere_og ?? '—' }}
-                                </p>
-                            </div>
-                            <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0" :class="open ? 'rotate-180' : ''"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </button>
+                        <div class="flex items-center">
+                            <button @click="open = !open"
+                                    class="flex-1 px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition text-left rounded-l-xl min-w-0">
+                                <div class="min-w-0">
+                                    <p class="font-medium text-gray-900 text-sm">Ordonnance du {{ $ordonnance->date->format('d/m/Y') }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        OD {{ ($ordonnance->sphere_od ?? 0) > 0 ? '+' : '' }}{{ $ordonnance->sphere_od ?? '—' }}
+                                        / OG {{ ($ordonnance->sphere_og ?? 0) > 0 ? '+' : '' }}{{ $ordonnance->sphere_og ?? '—' }}
+                                    </p>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform shrink-0 ml-3" :class="open ? 'rotate-180' : ''"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            @unless($isSuperAdmin)
+                                <button @click="setEditOrd({{ Js::from($ordData) }})"
+                                        class="px-4 py-4 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition rounded-r-xl shrink-0 border-l border-gray-100"
+                                        title="Modifier l'ordonnance">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                            @endunless
+                        </div>
                         <div x-show="open" x-collapse class="px-5 pb-5">
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                                 @foreach([
@@ -216,10 +248,21 @@
     </div>
 
     @unless($isSuperAdmin)
+
+    @php
+        $champOrd = [
+            ['sphere_od','Sphère OD'],['sphere_og','Sphère OG'],
+            ['cylindre_od','Cylindre OD'],['cylindre_og','Cylindre OG'],
+            ['axe_od','Axe OD (°)'],['axe_og','Axe OG (°)'],
+            ['addition_od','Addition OD'],['addition_og','Addition OG'],
+        ];
+    @endphp
+
     {{-- Modal Nouvelle ordonnance --}}
-    <x-modal name="new-ordonnance" max-width="lg" :show="$errors->isNotEmpty()">
+    <x-modal name="new-ordonnance" max-width="lg" :show="$errors->isNotEmpty() && old('_modal') === 'new-ordonnance'">
         <form method="POST" action="{{ route('admin.dossiers.ordonnances.store', $patient) }}" class="p-6">
             @csrf
+            <input type="hidden" name="_modal" value="new-ordonnance">
             <h2 class="text-lg font-semibold text-gray-900 mb-5">Nouvelle ordonnance</h2>
 
             <div class="grid grid-cols-2 gap-4">
@@ -229,15 +272,6 @@
                                   :value="old('date', now()->format('Y-m-d'))" required/>
                     <x-input-error :messages="$errors->get('date')" class="mt-1"/>
                 </div>
-
-                @php
-                    $champOrd = [
-                        ['sphere_od','Sphère OD'],['sphere_og','Sphère OG'],
-                        ['cylindre_od','Cylindre OD'],['cylindre_og','Cylindre OG'],
-                        ['axe_od','Axe OD (°)'],['axe_og','Axe OG (°)'],
-                        ['addition_od','Addition OD'],['addition_og','Addition OG'],
-                    ];
-                @endphp
 
                 @foreach($champOrd as [$name, $label])
                     <div>
@@ -252,6 +286,7 @@
                     <x-input-label for="ord_ep" value="Écart pupillaire (mm)"/>
                     <x-text-input id="ord_ep" name="ecart_pupillaire" type="number" step="0.5"
                                   class="mt-1 block w-full" :value="old('ecart_pupillaire')" placeholder="Ex: 63"/>
+                    <x-input-error :messages="$errors->get('ecart_pupillaire')" class="mt-1"/>
                 </div>
 
                 <div class="col-span-2">
@@ -267,6 +302,55 @@
             </div>
         </form>
     </x-modal>
+
+    {{-- Modal Modifier ordonnance --}}
+    <x-modal name="edit-ordonnance" max-width="lg" :show="$errors->isNotEmpty() && old('_modal') === 'edit-ordonnance'">
+        <form method="POST"
+              :action="`{{ url('dashboard/dossiers/'.$patient->id.'/ordonnances') }}/${editOrd?.id}`"
+              class="p-6">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="_modal" value="edit-ordonnance">
+            <h2 class="text-lg font-semibold text-gray-900 mb-5">Modifier l'ordonnance</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <x-input-label value="Date *"/>
+                    <x-text-input name="date" type="date" class="mt-1 block w-full"
+                                  x-model="editOrd.date" required/>
+                    <x-input-error :messages="$errors->get('date')" class="mt-1"/>
+                </div>
+
+                @foreach($champOrd as [$name, $label])
+                    <div>
+                        <x-input-label value="{{ $label }}"/>
+                        <x-text-input name="{{ $name }}" type="number" step="0.25"
+                                      class="mt-1 block w-full" x-model="editOrd.{{ $name }}" placeholder="—"/>
+                        <x-input-error :messages="$errors->get('{{ $name }}')" class="mt-1"/>
+                    </div>
+                @endforeach
+
+                <div>
+                    <x-input-label value="Écart pupillaire (mm)"/>
+                    <x-text-input name="ecart_pupillaire" type="number" step="0.5"
+                                  class="mt-1 block w-full" x-model="editOrd.ecart_pupillaire" placeholder="Ex: 63"/>
+                    <x-input-error :messages="$errors->get('ecart_pupillaire')" class="mt-1"/>
+                </div>
+
+                <div class="col-span-2">
+                    <x-input-label value="Notes"/>
+                    <textarea name="notes" rows="2" x-model="editOrd.notes"
+                              class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm text-sm"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <x-secondary-button type="button" @click="$dispatch('close-modal', 'edit-ordonnance')">Annuler</x-secondary-button>
+                <x-primary-button>Mettre à jour l'ordonnance</x-primary-button>
+            </div>
+        </form>
+    </x-modal>
+
     @endunless
 
 </div>

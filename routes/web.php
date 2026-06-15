@@ -129,6 +129,7 @@ Route::prefix('dashboard')->name('admin.')->middleware(['auth', 'verified', 'rol
     Route::get('dossiers', [DossierCabinetController::class, 'index'])->name('dossiers.index');
     Route::get('dossiers/{patient}', [DossierCabinetController::class, 'show'])->name('dossiers.show');
     Route::post('dossiers/{patient}/ordonnances', [DossierCabinetController::class, 'storeOrdonnance'])->name('dossiers.ordonnances.store');
+    Route::put('dossiers/{patient}/ordonnances/{ordonnance}', [DossierCabinetController::class, 'updateOrdonnance'])->name('dossiers.ordonnances.update');
 
     // Examens optiques
     Route::get('examens', [ExamenController::class, 'index'])->name('examens.index');

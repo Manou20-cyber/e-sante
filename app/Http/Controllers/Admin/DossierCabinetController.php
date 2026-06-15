@@ -57,4 +57,14 @@ class DossierCabinetController extends Controller
 
         return back()->with('success', 'Ordonnance ajoutée au dossier.');
     }
+
+    public function updateOrdonnance(StoreOrdonnanceRequest $request, Patient $patient, Ordonnance $ordonnance): RedirectResponse
+    {
+        abort_if(auth()->user()->hasRole('super_admin'), 403);
+        abort_if($ordonnance->dossier->patient_id !== $patient->id, 403);
+
+        $ordonnance->update($request->validated());
+
+        return back()->with('success', 'Ordonnance mise à jour.');
+    }
 }
