@@ -12,7 +12,7 @@
 </head>
 <body class="font-sans antialiased bg-gray-50">
 
-<div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
+<div x-data="{ sidebarOpen: false, logoutOpen: false }" class="min-h-screen flex">
 
     {{-- Overlay mobile --}}
     <div x-show="sidebarOpen" x-on:click="sidebarOpen = false"
@@ -96,13 +96,10 @@
                    class="flex-1 text-center text-xs th-sidebar-muted hover:text-white py-1.5 rounded-lg th-sidebar-hover transition">
                     Profil
                 </a>
-                <form method="POST" action="{{ route('logout') }}" class="flex-1">
-                    @csrf
-                    <button type="submit"
-                            class="w-full text-xs th-sidebar-muted hover:text-white py-1.5 rounded-lg th-sidebar-hover transition">
-                        Déconnexion
-                    </button>
-                </form>
+                <button type="button" @click="logoutOpen = true"
+                        class="flex-1 text-xs th-sidebar-muted hover:text-white py-1.5 rounded-lg th-sidebar-hover transition">
+                    Déconnexion
+                </button>
             </div>
         </div>
     </aside>
@@ -134,32 +131,14 @@
                     @endif
                 </a>
 
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" title="Déconnexion"
-                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                        </svg>
-                    </button>
-                </form>
+                <button type="button" @click="logoutOpen = true" title="Déconnexion"
+                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </button>
 
-                @if(session('success'))
-                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-                         class="flex items-center gap-2 bg-green-50 text-green-700 text-sm px-3 py-1.5 rounded-lg border border-green-200">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        {{ session('success') }}
-                    </div>
-                @endif
-                @if(session('error'))
-                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
-                         class="flex items-center gap-2 bg-red-50 text-red-700 text-sm px-3 py-1.5 rounded-lg border border-red-200">
-                        {{ session('error') }}
-                    </div>
-                @endif
             </div>
         </header>
 
@@ -167,7 +146,92 @@
             {{ $slot }}
         </main>
     </div>
+
+    {{-- Modal déconnexion --}}
+    <div x-show="logoutOpen" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" @click="logoutOpen = false"></div>
+        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+            </div>
+            <h3 class="text-base font-semibold text-gray-900 text-center mb-1">Déconnexion</h3>
+            <p class="text-sm text-gray-500 text-center mb-6">Êtes-vous sûr de vouloir vous déconnecter ?</p>
+            <div class="flex gap-3">
+                <button type="button" @click="logoutOpen = false"
+                        class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                    Annuler
+                </button>
+                <form method="POST" action="{{ route('logout') }}" class="flex-1">
+                    @csrf
+                    <button type="submit"
+                            class="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition">
+                        Se déconnecter
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+{{-- Toasts --}}
+@if(session('success') || session('error'))
+    <div class="fixed top-6 right-6 z-50 flex flex-col gap-2" id="toast-container">
+        @if(session('success'))
+            <div id="toast-success" style="background-color: var(--th-primary); transition: opacity 0.5s ease-in;"
+                 class="flex items-center gap-3 text-white text-sm px-4 py-3 rounded-xl shadow-lg max-w-sm">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background-color: rgba(255,255,255,0.2);">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+        @if(session('error'))
+            <div id="toast-error" style="transition: opacity 0.5s ease-in;"
+                 class="flex items-center gap-3 bg-red-600 text-white text-sm px-4 py-3 rounded-xl shadow-lg max-w-sm">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background-color: rgba(255,255,255,0.2);">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </div>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+    </div>
+    <script>
+        function dismissToast(id, delay) {
+            setTimeout(function () {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.style.opacity = '0';
+                setTimeout(function () {
+                    el.remove();
+                    var c = document.getElementById('toast-container');
+                    if (c && !c.children.length) c.remove();
+                }, 500);
+            }, delay);
+        }
+        @if(session('success')) dismissToast('toast-success', 4000); @endif
+        @if(session('error'))  dismissToast('toast-error',   5000); @endif
+    </script>
+@endif
 
 </body>
 </html>

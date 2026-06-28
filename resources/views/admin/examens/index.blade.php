@@ -28,12 +28,6 @@
         @endunless
     </div>
 
-    @if(session('success'))
-        <div class="mb-5 px-4 py-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">

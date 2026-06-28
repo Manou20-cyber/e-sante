@@ -30,12 +30,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="mb-5 px-4 py-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl">
-            {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Onglets --}}
     <div class="flex gap-1 mb-6 border-b border-gray-200">
         @foreach([['dossier','Dossier médical'],['ordonnances','Ordonnances ('.($patient->dossierMedical?->ordonnances->count() ?? 0).')'],['consultations','Consultations ('.$patient->consultations->count().')'],['examens','Examens ('.$patient->examens->count().')']] as [$key,$label])

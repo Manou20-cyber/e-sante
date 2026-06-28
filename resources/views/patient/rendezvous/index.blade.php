@@ -26,7 +26,7 @@
 
 <div x-data="{
     showRdv: null,
-    editRdv: null,
+    editRdv: {},
     deleteId: null,
     setShow(rdv)   { this.showRdv = rdv;  $dispatch('open-modal', 'show-rdv') },
     setEdit(rdv)   { this.editRdv = rdv;  $dispatch('open-modal', 'edit-rdv') },
@@ -46,12 +46,6 @@
             Prendre un rendez-vous
         </a>
     </div>
-
-    @if(session('success'))
-        <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if($rendezvous->isEmpty())
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">

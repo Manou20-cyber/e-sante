@@ -1,14 +1,5 @@
 <x-patient-layout title="Facture {{ $facture->numero }}">
 
-@if(session('success'))
-    <div class="mb-5 px-4 py-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl flex items-center gap-2">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        {{ session('success') }}
-    </div>
-@endif
-
 {{-- Navigation --}}
 <div class="mb-5">
     <a href="{{ route('patient.factures.index') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">

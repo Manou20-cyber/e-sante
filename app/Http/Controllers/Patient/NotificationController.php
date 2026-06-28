@@ -26,7 +26,7 @@ class NotificationController extends Controller
     {
         auth()->user()->notifications()->findOrFail($id)->markAsRead();
 
-        return back();
+        return back()->with('success', 'Notification marquée comme lue.');
     }
 
     public function markAllRead(): RedirectResponse

@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] { display: none !important; }
+
 /* ─── Valeurs par défaut du thème (écrasées par partials/theme.blade.php) ─── */
 :root {
     --th-sidebar-bg:         #1e3a5f;

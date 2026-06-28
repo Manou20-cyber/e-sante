@@ -2,12 +2,6 @@
 
 <div x-data="{}">
 
-    @if(session('success'))
-        <div class="mb-5 px-4 py-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Colonne gauche --}}
