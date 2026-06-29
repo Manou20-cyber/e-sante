@@ -159,10 +159,11 @@
     </x-modal>
 
     {{-- Modal Modifier --}}
-    <x-modal name="edit-creneau" max-width="md">
+    <x-modal name="edit-creneau" max-width="md" :show="$errors->isNotEmpty() && old('_modal') === 'edit-creneau'">
         <form method="POST" :action="`{{ url('dashboard/planning') }}/${editItem?.id}`" class="p-6">
             @csrf
             @method('PUT')
+            <input type="hidden" name="_modal" value="edit-creneau">
             <h2 class="text-lg font-semibold text-gray-900 mb-5">Modifier le créneau</h2>
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
@@ -176,10 +177,12 @@
                 <div>
                     <x-input-label value="Heure début *"/>
                     <x-text-input name="heure_debut" type="time" class="mt-1 block w-full" x-model="editItem.heure_debut" required/>
+                    <x-input-error :messages="$errors->get('heure_debut')" class="mt-1"/>
                 </div>
                 <div>
                     <x-input-label value="Heure fin *"/>
                     <x-text-input name="heure_fin" type="time" class="mt-1 block w-full" x-model="editItem.heure_fin" required/>
+                    <x-input-error :messages="$errors->get('heure_fin')" class="mt-1"/>
                 </div>
                 <div>
                     <x-input-label value="Durée (min) *"/>
