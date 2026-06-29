@@ -32,6 +32,7 @@ class ProfileUpdateRequest extends FormRequest
             'adresse' => ['nullable', 'string', 'max:500'],
             'ville' => ['nullable', 'string', 'max:100'],
             'code_postal' => ['nullable', 'string', 'max:10'],
+            'avatar' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }

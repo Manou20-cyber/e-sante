@@ -24,6 +24,7 @@ class UpdateProduitRequest extends FormRequest
             'categorie' => ['required', 'in:monture,lentille,verre,accessoire,autre'],
             'marque' => ['nullable', 'string', 'max:100'],
             'est_actif' => ['boolean'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }

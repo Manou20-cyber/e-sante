@@ -61,6 +61,10 @@
                     </div>
 
                     <div class="flex gap-2">
+                        <a href="{{ route('admin.opticiens.planning.index', $opticien) }}"
+                           class="flex-1 text-center text-xs py-1.5 border border-blue-200 text-blue-600 rounded-lg hover:bg-blue-50 transition">
+                            Planning
+                        </a>
                         <button @click="setEdit({{ $opticien }})"
                                 class="flex-1 text-xs py-1.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition">
                             Modifier

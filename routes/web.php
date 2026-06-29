@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DossierCabinetController;
 use App\Http\Controllers\Admin\ExamenController;
 use App\Http\Controllers\Admin\MessageAdminController;
 use App\Http\Controllers\Admin\OpticienController;
+use App\Http\Controllers\Admin\OpticienPlanningController;
 use App\Http\Controllers\Admin\ParametreController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\PlanningController;
@@ -112,6 +113,10 @@ Route::prefix('dashboard')->name('admin.')->middleware(['auth', 'verified', 'rol
     // Opticiens (cabinet_admin uniquement)
     Route::middleware('role:cabinet_admin')->group(function () {
         Route::resource('opticiens', OpticienController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get('opticiens/{opticien}/planning', [OpticienPlanningController::class, 'index'])->name('opticiens.planning.index');
+        Route::post('opticiens/{opticien}/planning', [OpticienPlanningController::class, 'store'])->name('opticiens.planning.store');
+        Route::put('opticiens/{opticien}/planning/{creneau}', [OpticienPlanningController::class, 'update'])->name('opticiens.planning.update');
+        Route::delete('opticiens/{opticien}/planning/{creneau}', [OpticienPlanningController::class, 'destroy'])->name('opticiens.planning.destroy');
     });
 
     // Planning (opticien + cabinet_admin)

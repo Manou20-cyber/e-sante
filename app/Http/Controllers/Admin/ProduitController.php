@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateProduitRequest;
 use App\Models\CabinetOptique;
 use App\Models\Produit;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProduitController extends Controller
@@ -33,7 +34,13 @@ class ProduitController extends Controller
     {
         abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne crée pas de produits.');
 
-        Produit::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $data['images'] = [$request->file('image')->store('produits/images', 'public')];
+        }
+
+        Produit::create($data);
 
         return back()->with('success', 'Produit créé avec succès.');
     }
@@ -42,7 +49,16 @@ class ProduitController extends Controller
     {
         abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne modifie pas les produits.');
 
-        $produit->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            foreach ($produit->images ?? [] as $old) {
+                Storage::disk('public')->delete($old);
+            }
+            $data['images'] = [$request->file('image')->store('produits/images', 'public')];
+        }
+
+        $produit->update($data);
 
         return back()->with('success', 'Produit mis à jour avec succès.');
     }
@@ -50,6 +66,10 @@ class ProduitController extends Controller
     public function destroy(Produit $produit): RedirectResponse
     {
         abort_if(auth()->user()->hasRole('super_admin'), 403, 'Le super admin ne supprime pas les produits.');
+
+        foreach ($produit->images ?? [] as $path) {
+            Storage::disk('public')->delete($path);
+        }
 
         $produit->delete();
 

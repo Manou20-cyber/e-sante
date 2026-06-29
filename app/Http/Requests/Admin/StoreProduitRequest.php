@@ -23,6 +23,7 @@ class StoreProduitRequest extends FormRequest
             'stock_alerte' => ['required', 'integer', 'min:0'],
             'categorie' => ['required', 'in:monture,lentille,verre,accessoire,autre'],
             'marque' => ['nullable', 'string', 'max:100'],
+            'image' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }

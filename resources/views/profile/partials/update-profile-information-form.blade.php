@@ -2,11 +2,32 @@
     @csrf
 </form>
 
-<form method="post" action="{{ route('profile.update') }}" class="space-y-4">
+<form method="post" action="{{ route('profile.update') }}" class="space-y-4" enctype="multipart/form-data">
     @csrf
     @method('patch')
 
     @php $patient = $user->patient; @endphp
+
+    {{-- Photo de profil --}}
+    <div class="flex items-center gap-5 pb-4 border-b border-gray-100">
+        <div class="shrink-0">
+            @if($user->avatar)
+                <img src="{{ Storage::url($user->avatar) }}" alt="Avatar"
+                     class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+            @else
+                <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-600">
+                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                </div>
+            @endif
+        </div>
+        <div class="flex-1">
+            <x-input-label for="avatar" value="Photo de profil"/>
+            <input id="avatar" name="avatar" type="file" accept="image/*"
+                   class="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
+            <p class="text-xs text-gray-400 mt-1">JPG, PNG, GIF — max 2 Mo</p>
+            <x-input-error class="mt-1" :messages="$errors->get('avatar')"/>
+        </div>
+    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="sm:col-span-2">

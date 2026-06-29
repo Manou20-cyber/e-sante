@@ -32,6 +32,7 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
                     <tr>
+                        <th class="px-6 py-3 text-left font-medium">Photo</th>
                         <th class="px-6 py-3 text-left font-medium">Libellé</th>
                         <th class="px-6 py-3 text-left font-medium">Cabinet</th>
                         <th class="px-6 py-3 text-left font-medium">Catégorie</th>
@@ -46,6 +47,19 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($produits as $produit)
                         <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-3">
+                                @if(!empty($produit->images[0]))
+                                    <img src="{{ Storage::url($produit->images[0]) }}" alt=""
+                                         class="w-10 h-10 rounded-lg object-cover border border-gray-100">
+                                @else
+                                    <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </td>
                             <td class="px-6 py-3 font-medium text-gray-900">
                                 {{ $produit->libelle }}
                                 @if($produit->marque)
@@ -95,7 +109,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $isSuperAdmin ? 6 : 7 }}" class="px-6 py-10 text-center text-gray-400">Aucun produit</td>
+                            <td colspan="{{ $isSuperAdmin ? 7 : 8 }}" class="px-6 py-10 text-center text-gray-400">Aucun produit</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -110,7 +124,7 @@
 
     {{-- Modal Créer --}}
     <x-modal name="create-produit" max-width="lg">
-        <form method="POST" action="{{ route('admin.produits.store') }}" class="p-6">
+        <form method="POST" action="{{ route('admin.produits.store') }}" class="p-6" enctype="multipart/form-data">
             @csrf
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Nouveau produit</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -159,6 +173,12 @@
                     <x-input-label for="pr_ref" value="Référence"/>
                     <x-text-input id="pr_ref" name="reference" class="mt-1 block w-full"/>
                 </div>
+                <div class="sm:col-span-2">
+                    <x-input-label for="pr_image" value="Photo du produit"/>
+                    <input id="pr_image" name="image" type="file" accept="image/*"
+                           class="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
+                    <p class="text-xs text-gray-400 mt-1">JPG, PNG — max 2 Mo</p>
+                </div>
             </div>
             <div class="flex justify-end gap-3 mt-6">
                 <x-secondary-button type="button" @click="$dispatch('close-modal', 'create-produit')">Annuler</x-secondary-button>
@@ -169,7 +189,7 @@
 
     {{-- Modal Modifier --}}
     <x-modal name="edit-produit" max-width="lg">
-        <form method="POST" :action="`{{ url('dashboard/produits') }}/${editItem?.id}`" class="p-6">
+        <form method="POST" :action="`{{ url('dashboard/produits') }}/${editItem?.id}`" class="p-6" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Modifier le produit</h2>
@@ -220,6 +240,16 @@
                            x-bind:checked="editItem?.est_actif"
                            class="rounded border-gray-300 text-blue-600 shadow-sm"/>
                     <label for="pr_actif" class="text-sm text-gray-700">Produit actif</label>
+                </div>
+                <div class="sm:col-span-2">
+                    <x-input-label value="Changer la photo"/>
+                    <template x-if="editItem.images && editItem.images.length > 0">
+                        <img :src="`{{ Storage::url('') }}${editItem.images[0]}`" alt=""
+                             class="mb-2 w-16 h-16 rounded-lg object-cover border border-gray-200">
+                    </template>
+                    <input name="image" type="file" accept="image/*"
+                           class="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
+                    <p class="text-xs text-gray-400 mt-1">Laissez vide pour conserver la photo actuelle.</p>
                 </div>
             </div>
             <div class="flex justify-end gap-3 mt-6">
